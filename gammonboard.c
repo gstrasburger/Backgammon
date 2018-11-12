@@ -1,0 +1,52 @@
+/* gammonboard.c
+ * defines the board struct and includes the board constructing function
+ * Gabe Strasburger
+ */
+
+#include "backgammon.h"
+#include "stdio.h"
+#include "stdlib.h"
+
+struct board * newgame(){
+  struct board * B = malloc(sizeof(struct board));
+  int size=25*sizeof(int);
+  B->spaces = malloc(size);
+  for(int i=0;i<24;i++){
+    B->spaces[i]=0;
+  }
+  B->spaces[1]=2;
+  B->spaces[6]=-5;
+  B->spaces[8]=-3;
+  B->spaces[12]=5;
+  B->spaces[13]=-5;
+  B->spaces[17]=3;
+  B->spaces[19]=5;
+  B->spaces[24]=-2;
+  B->bbar=0;
+  B->wbar=0;
+  B->bout=10;
+  B->wout=10;
+  B->boff=0;
+  B->woff=0;
+  return B;
+}
+
+void copyboard(struct board *B,struct board *new){
+  for(int i=0;i<24;i++){
+    new->spaces[i]=B->spaces[i];
+  }
+  new->bbar=B->bbar;
+  new->wbar=B->wbar;
+  new->bout=B->bout;
+  new->wout=B->wout;
+  new->boff=B->boff;
+  new->woff=B->woff;
+}
+
+void freeboard(struct board *B){
+  free(B->spaces);
+  free(B);
+}
+
+
+  
