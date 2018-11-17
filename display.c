@@ -85,6 +85,8 @@ void display(struct board *B){
     printf("%c",'\n');
   }
   printf("%s","   -------------\n");
+  printf("Black pieces on outer board: %i\n", B->bout);
+  printf("White pieces on outer board: %i\n", B->wout);
   printf("Black pieces beared off: %i\n",B->boff);
   printf("White pieces beared off: %i\n\n",B->woff);
 }

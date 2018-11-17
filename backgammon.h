@@ -19,6 +19,9 @@ struct board{
 struct board * newgame();
 void copyboard(struct board *B, struct board *new);
 void freeboard(struct board *B);
+void saveboard(struct board *B, int turn);
+struct board * loadboard();
+int getturn();
 
 #endif
 

@@ -31,6 +31,93 @@ struct board * newgame(){
   return B;
 }
 
+void saveboard(struct board *B, int turn){
+  FILE *file_pointer;
+  file_pointer = fopen("savedboard.txt","w");
+  fprintf(file_pointer, "%i\n",turn);
+  for(int i=1;i<25;i++){
+    fprintf(file_pointer, "%i\n", B->spaces[i]);
+  }
+  fprintf(file_pointer, "%i\n",B->bbar);
+  fprintf(file_pointer, "%i\n",B->wbar);
+  fprintf(file_pointer, "%i\n",B->bout);
+  fprintf(file_pointer, "%i\n",B->wout);
+  fprintf(file_pointer, "%i\n",B->boff);
+  fprintf(file_pointer, "%i\n",B->woff);  
+}  
+
+int getturn(){
+    FILE *fp;
+  char c;
+  struct board * B = malloc(sizeof(struct board));
+  int size=25*sizeof(int);
+  B->spaces = malloc(size);
+  fp = fopen("savedboard.txt","r");
+  c = fgetc(fp);
+  if(c=='-'){
+    return -1;
+  }
+  else {
+    return 1;
+  }
+}
+
+struct board * loadboard(){
+  FILE *fp;
+  char c;
+  struct board * B = malloc(sizeof(struct board));
+  int size=25*sizeof(int);
+  B->spaces = malloc(size);
+  fp = fopen("savedboard.txt","r");
+  int isnegative = 0;
+  int result = 0;
+  while('\n' != (c = fgetc(fp))){
+    continue;
+  }
+  for(int i = 1; i < 31; i++){
+    c = fgetc(fp);
+    if(c=='-'){
+      //printf("Found a negative\n");
+      isnegative = 1;
+      c = fgetc(fp);
+    }
+    while(c != '\n'){
+      //printf("Found a %c\n",c);
+      result = result * 10;
+      result = result + (c - '0');
+      c = fgetc(fp);
+    }
+    if(isnegative==1){
+      isnegative = 0;
+      result = result * -1;
+    }
+    if(i==25){
+      B->bbar = result;
+    }
+    else if(i==26){
+      B->wbar=result;
+    }
+    else if(i==27){
+      B->bout = result;
+    }
+    else if(i==28){
+      B->wout = result;
+    }
+    else if(i==29){
+      B->boff = result;
+    }
+    else if(i==30){
+      B->woff = result;
+    }
+    else{
+      B->spaces[i] = result;
+    }
+    result = 0;   
+  }
+  return B;
+}
+  
+
 void copyboard(struct board *B,struct board *new){
   for(int i=0;i<24;i++){
     new->spaces[i]=B->spaces[i];

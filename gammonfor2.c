@@ -7,10 +7,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "time.h"
-<<<<<<< HEAD
 #include "string.h"
-=======
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
 
 int main(){
   struct board *B=newgame();
@@ -91,41 +88,58 @@ int main(){
     //takes input and makes move
     else{
       printf("Input move in the form of the space to move from followed by which die to use (sequentially), i.e. \"06 2\" (use b to refer to bar or q to quit):");
-<<<<<<< HEAD
       
       int space = 0;
-=======
-      int space;
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
       int move=0;
       int alt=0;
       char c1=getchar();
       if(c1=='q'||c1=='Q'){
 	exit(0);
       }
+      if(c1=='s'||c1=='S'){
+	saveboard(B, turn);
+	printf("Board saved!\n");
+	char c = getchar();
+	while(c != '\n'){
+	  c = getchar();
+	}
+	continue;
+      }
+      if(c1=='l'||c1=='L'){
+	struct board * new = loadboard();
+	turn = getturn();
+	struct board * old = B;
+	B = new;
+	freeboard(old);
+	char c = getchar();
+	display(B);
+	printf("Board loaded!\n");
+	if(turn==1){
+	  printf("It is now White's Turn\n");
+	}
+	else{
+	  printf("It is now Black's Turn\n");
+	}
+	while(c != '\n'){
+	  c = getchar();
+	}
+	continue;
+      }
       char c2;
       if(c1!='b'&& c1!='B'){
 	c2=getchar();
       }
-<<<<<<< HEAD
-      char u=getchar();
+      getchar();
       char c3=getchar();
       if(c1!='b'&& c1!='B'){
 	printf("Space before is %d, c1 is %c, c2 is %c\n",space,c1,c2);
 	space=(c1-'0')*10+(c2-'0');
 	printf("Space after is %d\n",space);
-=======
-      getchar();
-      char c3=getchar();
-      if(c1!='b'&& c1!='B'){
-	space=(c1-'0')*10+(c2-'0');
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
       }	
       else{
 	space=25;
       }
       if(doubles==1){
-<<<<<<< HEAD
 	move=dice[0];
       }
       else if(c3=='1'){
@@ -133,30 +147,6 @@ int main(){
       }
       else{
 	move=dice[1];
-=======
-	move=d1;
-	if(dice[3]!=0){
-	  dice[3]=0;
-	}
-	else if(dice[2]!=0){
-	  dice[2]=0;
-	}
-	else if(dice[1]!=0){
-            dice[1]=0;
-	}
-	else{
-	  dice[0]=0;
-	}
-      }
-      else if(c3-'0'==1){
-	move=dice[0];
-	dice[0]=dice[1];
-	dice[1]=0;
-      }
-      else{
-	move=dice[1];
-	dice[1]=0;
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
       }
       if(doubles==0 && dice[1]!=0){
 	alt=dice[1];
@@ -165,10 +155,7 @@ int main(){
 	alt=-1;
       }
       int out;
-<<<<<<< HEAD
       printf("Move: %d Space: %d", move, space);
-=======
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
       if(turn==1){
 	out=whitemove(B,space,move,alt);
       }
@@ -196,7 +183,6 @@ int main(){
       else if(out==6){
         printf("%s","If you can use both dice, you must. You can’t use the first in such a way that it prevents you from moving the second.\n");
       }
-<<<<<<< HEAD
       if(out==0){
 	if(doubles==1){
 	  if(dice[3]!=0){
@@ -218,14 +204,6 @@ int main(){
 	}
 	else{
 	  dice[1]=0;
-=======
-      if(out!=0){
-	int f=3;
-	while(dice[f]==0){
-	  if(dice[f-1]!=0){
-	    dice[f]=move;
-	  }
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
 	}
       }
       if(B->woff==15){
@@ -237,12 +215,9 @@ int main(){
 	printf("%s","Black wins!");
       }
     }
-<<<<<<< HEAD
     while(getchar()!='\n'){
       continue;
     }
-=======
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
   }
 }
 

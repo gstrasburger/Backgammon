@@ -9,12 +9,9 @@
 
 int whitecan(struct board *B, int move){
   printf("call to wcan\n");
-<<<<<<< HEAD
   if(move==0){
     return 1;
   }
-=======
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
   if(move==-1){
     return 0;
   }
@@ -68,12 +65,9 @@ int waltmove(struct board *B, int alt, int real){
 
 int blackcan(struct board *B, int move){
   printf("call to bcan\n");
-<<<<<<< HEAD
   if(move==0){
     return 1;
   }
-=======
->>>>>>> 7e297a274c00bb0df473fc45fc38c2e3190f1eab
   if(move==-1){
     return 0;
   }
