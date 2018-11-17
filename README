@@ -1,0 +1,5 @@
+Forgot to write this into the program itself, but:
+s saves board state, l loads board
+You can only save one board at a time
+I could probably allow it for saving multiple boards but do we really wanna bother
+Everything should be working, tho, so that's cool
