@@ -55,3 +55,12 @@ int blackcan(struct board * B, int move);
 void display(struct board * B);
 
 #endif
+
+#ifndef EVAL
+#define EVAL
+
+double WbarVal(struct board * b);
+double BbarVal(struct board * b);
+double BoardVal(struct board * b);
+
+#endif
