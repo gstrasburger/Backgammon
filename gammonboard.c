@@ -43,7 +43,8 @@ void saveboard(struct board *B, int turn){
   fprintf(file_pointer, "%i\n",B->bout);
   fprintf(file_pointer, "%i\n",B->wout);
   fprintf(file_pointer, "%i\n",B->boff);
-  fprintf(file_pointer, "%i\n",B->woff);  
+  fprintf(file_pointer, "%i\n",B->woff); 
+  fclose(file_pointer);
 }  
 
 int getturn(){
@@ -69,6 +70,10 @@ struct board * loadboard(){
   int size=25*sizeof(int);
   B->spaces = malloc(size);
   fp = fopen("savedboard.txt","r");
+  if(fp==NULL){
+    fprintf(stderr,"No saved board availible");
+    exit(1);
+  }
   int isnegative = 0;
   int result = 0;
   while('\n' != (c = fgetc(fp))){
@@ -114,6 +119,7 @@ struct board * loadboard(){
     }
     result = 0;   
   }
+  fclose(fp);
   return B;
 }
   

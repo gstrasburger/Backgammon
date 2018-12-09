@@ -114,7 +114,7 @@ int whitemove(struct board * B, int space, int move, int alt){
   else{
     B->spaces[dest]++;
   }
-  if(dest>18){
+  if(dest>18 && space<=18){
     B->wout--;
   }
   B->spaces[space]--;
@@ -129,7 +129,7 @@ int whitemove(struct board * B, int space, int move, int alt){
 	    B->bout--;
 	}
       }
-      if(dest>18){
+      if(dest>18 && space<=18){
 	B->wout++;
       }
     }
@@ -246,7 +246,7 @@ int blackmove(struct board * B, int space, int move, int alt){
   else{
     B->spaces[dest]--;
   }
-  if(dest<7){
+  if(dest<7 && space>=7){
     B->bout--;
   }
   B->spaces[space]++;
@@ -261,7 +261,7 @@ int blackmove(struct board * B, int space, int move, int alt){
 	  B->wout--;
 	}
       }
-      if(dest<7){
+      if(dest<7 && space>=7){
 	B->bout++;
       }
     }
