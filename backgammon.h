@@ -64,3 +64,16 @@ double BbarVal(struct board * b);
 double BoardVal(struct board * b);
 
 #endif
+
+#ifndef MINMAX
+#define MINMAX
+
+struct mmNode;
+struct ChoiceNode;
+struct mmNode * mmBuild(double probability,int * d,struct board * b,int minmax,int depth);
+struct ChoiceNode * ChoiceBuild(int * m, struct board b,int mm, int depth);
+int * TrieSearch(struct mmNode * head);
+double mmSearch(struct mmNode * node);
+double ChoiceSearch(struct ChoiceNode * node);
+
+#endif

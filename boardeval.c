@@ -2,6 +2,8 @@
  */
 
 #include "backgammon.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 static double inbonus = 0.1;
 static double offval = 25.5;
