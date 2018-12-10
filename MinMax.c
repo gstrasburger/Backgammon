@@ -26,7 +26,7 @@ struct ChoiceNode{
 };
 
 //This function should never directly alter the board passed to it! Always copy first!
-void childlist(struct mmNode * node, struct board * b, int * dice, int mm){
+void childlist(struct mmNode * node, struct board * b, int * dice, int mm, int depth){
 }
 
 mmNode * mmBuild(double probability, int * d,struct board * b, int minmax, int depth){
