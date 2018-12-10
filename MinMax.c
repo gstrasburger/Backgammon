@@ -26,10 +26,10 @@ struct ChoiceNode{
 };
 
 //This function should never directly alter the board passed to it! Always copy first!
-void childlist(struct mmNode * node, struct board * b, int * dice, int turn){
+void childlist(struct mmNode * node, struct board * b, int * dice, int mm){
 }
 
-mmNode * mmBuild(double probability, int * d,struct board * b, int minmax, int depth, int turn){
+mmNode * mmBuild(double probability, int * d,struct board * b, int minmax, int depth){
   struct mmNode * node=malloc(sizeof(struct mmNode));
   node->prob=probability;
   node->dice=d;
