@@ -10,7 +10,7 @@
 struct mmNode{
   int mm;
   double prob;
-  struct ChoiceNode * children;
+  struct ChoiceNode ** children;
   struct ChoiceNode * favorite;
   int numchildren;
   int * dice;
@@ -20,25 +20,360 @@ struct ChoiceNode{
   //keeps track of whether the node is a result of maximizer's or minimizer's choices
   int mm;
   double value;
-  struct mmNode * children;
+  struct mmNode** children;
   int * moves;
   struct board B;
 };
 
-//This function should never directly alter the board passed to it! Always copy first!
-void childlist(struct mmNode * node, struct board * b, int * dice, int mm, int depth){
+struct LLnode{
+  struct board * b;
+  int * moves;
+  struct LLnode * next;
+};
+
+struct LL{
+  struct LLnode * head;
+  struct LLnode * tail;
+  int length;
+};
+
+struct LL * newlist(){
+  struct LL* list=malloc(sizeof(LL));
+  struct LLnode* h=malloc(sizeof(LLnode));
+  struct LLnode* t=malloc(sizeof(LLnode));
+  list->head=h;
+  list->tail=t;
+  list->length=0;
 }
 
-mmNode * mmBuild(double probability, int * d,struct board * b, int minmax, int depth){
+void add(struct LL* list, struct board* bo, int* m){
+  struct LLnode* new=malloc(sizeof(LLnode));
+  new->next=list->head->next;
+  new->b=bo;
+  new->moves=m;
+  list->head->next=new;
+  list->length++;
+}
+
+int search(struct LL* list, struct board* bo){
+  struct LLnode* current=list->head->next;
+  while(current!=list->tail){
+    if(compareboards(bo,current->b)==1){
+      return 1;
+    }
+    current=current->next;
+  }
+  return 0;
+}
+
+void LLfree(struct LL* list){
+  struct LLnode* tofree=list->head->next;
+  while(current!=list->tail){
+    struct LLnode* soon=tofree->next;
+    freeboard(tofree->b);
+    if(tofree->moves!=NULL){
+      free(tofree->moves);
+    }
+    free(tofree);
+    tofree=soon;
+  }
+  free(list->head);
+  free(list->tail);
+  free(list);
+}
+
+//This function should never directly alter the board passed to it! Always copy first!
+int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int depth,int root){
+  //maximizer, i.e. white
+  if(mm=1){
+    //not doubles
+    if(dice[2]==0){
+      struct LL* L1=newlist();
+      struct LL* L2=newlist();
+      struct LL* final=newlist();
+      struct board* temp=newgame();
+      copyboard(b,temp);
+      //if there are white pieces on the bar move one using the first die
+      if(whitemove(temp,25,dice[0],dice[1])==0){
+	if(root==1){
+	  int* A[8]={25,dice[0],0,0,0,0,0,0};
+	}else{
+	  int* A=NULL;
+	}
+	add(L1,temp,A);
+	struct board* temp=newgame();
+	copyboard(b,temp);
+      //if not
+      }else{
+	//create a new entry in L1 with each space with white pieces moved by the first die
+	for(int i=1;i<25;i++){
+	  if(b->spaces[i]>0){
+	    if(whitemove(temp,i,dice[0],dice[1])==0){
+	      if(root==1){
+		int* A[8]={i,dice[0],0,0,0,0,0,0};
+	      }else{
+		int* A=NULL;
+	      }
+	      add(L1,temp,A);
+	      struct board* temp=newgame();
+	      copyboard(b,temp);
+	    }
+	  }
+	}
+      }
+      //if L1 is empty then no moves were possible with the first die alone, just make L1 a board that's the same as the original
+      if(L1->length==0){
+	if(root==1){
+          int* A[8]={25,dice[0],0,0,0,0,0,0};
+	}else{
+          int* A=NULL;
+        }
+	add(L1,b,A);
+      }
+      //same thing about the bar but with the second die
+      if(whitemove(temp,25,dice[1],dice[0])==0){
+	if(root==1){
+          int* A[8]={25,dice[1],0,0,0,0,0,0};
+	}else{
+          int* A=NULL;
+        }
+	add(L2,temp,A);
+        struct board* temp=newgame();
+        copyboard(b,temp);
+	//play all the moves that can be done with just the second die
+      }else{
+	for(int i=1;i<25;i++){
+	  if(b->spaces[i]>0){
+	    if(whitemove(temp,i,dice[1],dice[0])==0){
+	      if(root==1){
+		int* A[8]={i,dice[1],0,0,0,0,0,0};
+	      }else{
+		int* A=NULL;
+	      }
+	      add(L2,temp,A);
+	      struct board* temp=newgame();
+	      copyboard(b,temp);
+	    }
+	  }
+	} 
+      }
+      //if there was originally more than one piece on the bar or it was impossible to get a piece off the bar, then just take the other move from the bar, and make that single board the only child
+      if(L1->head->next->board->wbar>0 && L2->head->next->board->wbar>0){
+	whitemove(L1->head->next->board,25,dice[1],-1);
+	node->numchildren=1;
+	node->children=malloc(sizeof(ChoiceNode));
+	if(root==1){
+	  L1->head->next->moves[2]=25;
+	  L1->head->next->moves[3]=dice[1];
+	  int* A=malloc(8*sizeof(int));
+	  for(int j=0;j<8;j++){
+	    A[j]=L1->head->next->moves[i];
+	  }
+	}
+	else{
+	  int* A=NULL;
+	}
+	temp=newgame();
+	copyboard(L1->head->next->board,temp);
+	node->children[0]=ChoiceBuild(A,temp,mm,depth);
+	LLfree(L1);
+	LLfree(L2);
+	LLfree(final);
+	return 0;
+	//all cases where at least one board in L1 or L2 has no pieces on the bar
+      }else{
+	struct LLnode* current=L1->head->next;
+	temp=newgame();
+	copyboard(current->b,temp);
+	//take all the boards in L1, use d2 in every way possible, if the result is not a duplicate, add it to final
+	while(current!=L1->tail){
+	  for(int i=1;i<25;i++){
+	    if(current->b->spaces[i]>0){
+	      if(whitemove(temp,i,dice[1],-1)==0){
+		if(search(final,temp)==0){
+		  if(root==1){
+		    int* A=malloc(8*sizeof(int));
+		    for(int j=0;j<8;j++){
+		      A[j]=current->moves[i];
+		    }
+		    A[2]=i;
+		    A[3]=dice[1];
+		  }else{
+		    int* A=NULL;
+		  }
+		  add(final,temp,A);
+		  temp=newgame();
+		  copyboard(current->b,temp);
+		}
+	      }
+	    }
+	  }
+	  current=current->next;
+	}
+	LLfree(L1);
+	current=L2->head->next;
+	temp=newgame();
+	copyboard(current->b,temp);
+	//take all the boards in L2, use d1 in every way possible, if the result is not a duplicate, add it to final
+	while(current!=L2->tail){
+          for(int i=1;i<25;i++){
+            if(current->b->spaces[i]>0){
+              if(whitemove(temp,i,dice[0],-1)==0){
+		if(search(final,temp)==0){
+                  if(root==1){
+                    int* A=malloc(8*sizeof(int));
+                    for(int j=0;j<8;j++){
+                      A[j]=current->moves[i];
+                    }
+                    A[2]=i;
+                    A[3]=dice[0];
+                  }else{
+                    int* A=NULL;
+                  }
+                  add(final,temp,A);
+                  temp=newgame();
+                  copyboard(current->b,temp);
+		}
+	      } 
+            }
+          }
+	  current=current->next;
+        }
+	LLfree(L2);
+	node->numchildren=final->length;
+	node->children=malloc(final->length*sizeof(struct ChoiceNode));
+	current=final->head->next;
+	//Finally! Build the array of children.
+	for(i=0;i<final->length;i++){
+	  node->children[i]=ChoiceBuild(current->moves,current->b,mm,depth,0);
+	}
+	return 0;
+      }
+    }else{
+      //Here's where the code for maximizer rolling doubles goes!
+    }
+  }else{
+    if(dice[2]==0){
+      struct LL* L1=newlist();
+      struct LL* L2=newlist();
+      struct LL* final=newlist();
+      struct board* temp=newgame();
+      int* A=NULL;
+      copyboard(b,temp);
+      if(blackmove(temp,25,dice[0],dice[1])==0){
+        add(L1,temp,A);
+        struct board* temp=newgame();
+        copyboard(b,temp);
+      }else{
+	//create a new entry in L1 with each space with white pieces moved by the first die
+	for(int i=1;i<25;i++){
+	  if(b->spaces[i]>0){
+	    if(blackmove(temp,i,dice[0],dice[1])==0){
+	      add(L1,temp,A);
+	      struct board* temp=newgame();
+	      copyboard(b,temp);
+	    }
+	  }
+	}
+      }
+      //if L1 is empty then no moves were possible with the first die alone, just make a board that's the same as the original
+      if(L1->length==0){
+        add(L1,b,A);
+      }
+      //same thing about the bar but with the second die
+      if(blackmove(temp,25,dice[1],dice[0])==0){
+        add(L2,temp,A);
+        struct board* temp=newgame();
+        copyboard(b,temp);
+	//play all the moves that can be done with just the second
+      }else{
+	for(int i=1;i<25;i++){
+	  if(b->spaces[i]>0){
+	    if(blackmove(temp,i,dice[1],dice[0])==0){
+	      add(L2,temp,A);
+	      struct board* temp=newgame();
+	      copyboard(b,temp);
+	    }
+	  }
+	}
+      }
+      //if there was originally more than one piece on the bar or it was impossible to get a piece off the bar, then just take the other move from the bar, and make that single board the only child 
+      if(L1->head->next->board->wbar>0 && L2->head->next->board->wbar>0){
+	blackmove(L1->head->next->board,25,dice[1],-1);
+	node->numchildren=1;
+	node->children=malloc(sizeof(ChoiceNode));
+	temp=newgame();
+	copyboard(L1->head->next->board,temp);
+	node->children[0]=ChoiceBuild(A,temp,mm,depth);
+	LLfree(L1);
+	LLfree(L2);
+	LLfree(final);
+	return 0;
+	//all cases where at least one board in L1 or L2 has no pieces on the bar
+      }else{
+        struct LLnode* current=L1->head->next;
+        temp=newgame();
+        copyboard(current->b,temp);
+	//take all the boards in L1, use d2 in every way possible, if the result is not a duplicate, add it to final
+	while(current!=L1->tail){
+	  for(int i=1;i<25;i++){
+	    if(current->b->spaces[i]>0){
+	      if(blackmove(temp,i,dice[1],-1)==0){
+		if(search(final,temp)==0){
+		  add(final,temp,A);
+                  temp=newgame();
+                  copyboard(current->b,temp);
+                }
+              }
+            }
+          }
+          current=current->next;
+        }
+        LLfree(L1);
+        current=L2->head->next;
+        temp=newgame();
+        copyboard(current->b,temp);
+	//take all the boards in L2, use d1 in every way possible, if the result is not a duplicate, add it to final
+	while(current!=L2->tail){
+	  for(int i=1;i<25;i++){
+	    if(current->b->spaces[i]>0){
+	      if(blackmove(temp,i,dice[0],-1)==0){
+		if(search(final,temp)==0){
+		  add(final,temp,A);
+                  temp=newgame();
+                  copyboard(current->b,temp);
+                }
+              }
+            }
+          }
+          current=current->next;
+        }
+        LLfree(L2);
+        node->numchildren=final->length;
+        node->children=malloc(final->length*sizeof(struct ChoiceNode));
+        current=final->head->next;
+        //Finally! Build the array of children.
+	for(i=0;i<final->length;i++){
+          node->children[i]=ChoiceBuild(current->moves,current->b,mm,depth,0);
+        }
+        return 0;
+      }
+    }else{
+      //Here's where the code for maximizer rolling doubles goes!
+    }
+  }
+}
+
+struct mmNode * mmBuild(double probability, int * d,struct board * b, int minmax, int depth,int root){
   struct mmNode * node=malloc(sizeof(struct mmNode));
   node->prob=probability;
   node->dice=d;
   node->mm=minmax*-1;
-  childlist(node);
+  childlist(node,b,d,mm,depth,root);
   return node;
 }
 
-ChoiceNode * ChoiceBuild(int * m, board * b, int minmax, int depth){
+struct ChoiceNode * ChoiceBuild(int * m, board * b, int minmax, int depth){
   struct ChoiceNode * node=malloc(sizeof(struct ChoiceNode));
   node->mm=minmax;
   node->moves=m;
@@ -61,7 +396,7 @@ ChoiceNode * ChoiceBuild(int * m, board * b, int minmax, int depth){
       for(i=j+1;j<6){
 	index++;
 	int A[2]={i+1,j+1}
-	node->children[index]=mmBuild(punit*2,A,b,depth-1);
+	node->children[index]=mmBuild(punit*2,A,b,depth-1,0);
       }
     }
   }
