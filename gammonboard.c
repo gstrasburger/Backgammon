@@ -136,6 +136,34 @@ void copyboard(struct board *B,struct board *new){
   new->woff=B->woff;
 }
 
+int compareboards(struct board *B1, struct board *B2){
+  for(int i=0;i<24;i++){
+    if(B1->spaces[i]!=B2->spaces[i]){
+      return 0;
+    }
+  }
+  if(B1->bbar!=B2->bbar){
+    return 0;
+  }
+  if(B1->wbar!=B2->wbar){
+    return 0;
+  }
+  if(B1->bout!=B2->bout){
+    return 0;
+  }
+  if(B1->wout!=B2->wout){
+    return 0;
+  }
+  if(B1->boff!=B2->boff){
+    return 0;
+  }
+  if(B1->woff!=B2->woff){
+    return 0;
+  }
+  return 1;
+}
+
+
 void freeboard(struct board *B){
   free(B->spaces);
   free(B);

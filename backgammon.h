@@ -22,6 +22,7 @@ void freeboard(struct board *B);
 void saveboard(struct board *B, int turn);
 struct board * loadboard();
 int getturn();
+int compareboards(struct board *B1, struct board *B2);
 
 #endif
 
