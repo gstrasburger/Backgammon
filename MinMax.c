@@ -38,16 +38,17 @@ struct LL{
 };
 
 struct LL * newlist(){
-  struct LL* list=malloc(sizeof(LL));
-  struct LLnode* h=malloc(sizeof(LLnode));
-  struct LLnode* t=malloc(sizeof(LLnode));
+  struct LL* list=malloc(sizeof(struct LL));
+  struct LLnode* h=malloc(sizeof(struct LLnode));
+  struct LLnode* t=malloc(sizeof(struct LLnode));
   list->head=h;
   list->tail=t;
   list->length=0;
+  return list;
 }
 
 void add(struct LL* list, struct board* bo, int* m){
-  struct LLnode* new=malloc(sizeof(LLnode));
+  struct LLnode* new=malloc(sizeof(struct LLnode));
   new->next=list->head->next;
   new->b=bo;
   new->moves=m;
@@ -68,7 +69,7 @@ int search(struct LL* list, struct board* bo){
 
 void LLfree(struct LL* list){
   struct LLnode* tofree=list->head->next;
-  while(current!=list->tail){
+  while(tofree!=list->tail){
     struct LLnode* soon=tofree->next;
     freeboard(tofree->b);
     if(tofree->moves!=NULL){
@@ -85,7 +86,7 @@ void LLfree(struct LL* list){
 //This function should never directly alter the board passed to it! Always copy first!
 int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int depth,int root){
   //maximizer, i.e. white
-  if(mm=1){
+  if(mm==1){
     //not doubles
     if(dice[2]==0){
       struct LL* L1=newlist();
@@ -93,12 +94,15 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
       struct LL* final=newlist();
       struct board* temp=newgame();
       copyboard(b,temp);
+      int* A;
       //if there are white pieces on the bar move one using the first die
       if(whitemove(temp,25,dice[0],dice[1])==0){
 	if(root==1){
-	  int* A[8]={25,dice[0],0,0,0,0,0,0};
+	  A=malloc(8*sizeof(int));
+	  A[0]=25;
+	  A[1]=dice[0];
 	}else{
-	  int* A=NULL;
+	  A=NULL;
 	}
 	add(L1,temp,A);
 	struct board* temp=newgame();
@@ -110,9 +114,11 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
 	  if(b->spaces[i]>0){
 	    if(whitemove(temp,i,dice[0],dice[1])==0){
 	      if(root==1){
-		int* A[8]={i,dice[0],0,0,0,0,0,0};
+		A=malloc(8*sizeof(int));
+		A[0]=i;
+		A[1]=dice[0];
 	      }else{
-		int* A=NULL;
+		A=NULL;
 	      }
 	      add(L1,temp,A);
 	      struct board* temp=newgame();
@@ -124,18 +130,22 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
       //if L1 is empty then no moves were possible with the first die alone, just make L1 a board that's the same as the original
       if(L1->length==0){
 	if(root==1){
-          int* A[8]={25,dice[0],0,0,0,0,0,0};
+          A=malloc(8*sizeof(int));
+          A[0]=25;
+	  A[1]=dice[0];
 	}else{
-          int* A=NULL;
+          A=NULL;
         }
 	add(L1,b,A);
       }
       //same thing about the bar but with the second die
       if(whitemove(temp,25,dice[1],dice[0])==0){
 	if(root==1){
-          int* A[8]={25,dice[1],0,0,0,0,0,0};
+          A=malloc(8*sizeof(int));
+          A[0]=25;
+          A[1]=dice[1];
 	}else{
-          int* A=NULL;
+          A=NULL;
         }
 	add(L2,temp,A);
         struct board* temp=newgame();
@@ -146,9 +156,11 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
 	  if(b->spaces[i]>0){
 	    if(whitemove(temp,i,dice[1],dice[0])==0){
 	      if(root==1){
-		int* A[8]={i,dice[1],0,0,0,0,0,0};
+		A=malloc(8*sizeof(int));
+		A[0]=i;
+		A[1]=dice[0];
 	      }else{
-		int* A=NULL;
+		A=NULL;
 	      }
 	      add(L2,temp,A);
 	      struct board* temp=newgame();
@@ -158,23 +170,23 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
 	} 
       }
       //if there was originally more than one piece on the bar or it was impossible to get a piece off the bar, then just take the other move from the bar, and make that single board the only child
-      if(L1->head->next->board->wbar>0 && L2->head->next->board->wbar>0){
-	whitemove(L1->head->next->board,25,dice[1],-1);
+      if(L1->head->next->b->wbar>0 && L2->head->next->b->wbar>0){
+	whitemove(L1->head->next->b,25,dice[1],-1);
 	node->numchildren=1;
-	node->children=malloc(sizeof(ChoiceNode));
+	node->children=malloc(sizeof(struct ChoiceNode));
 	if(root==1){
 	  L1->head->next->moves[2]=25;
 	  L1->head->next->moves[3]=dice[1];
-	  int* A=malloc(8*sizeof(int));
+	  A=malloc(8*sizeof(int));
 	  for(int j=0;j<8;j++){
-	    A[j]=L1->head->next->moves[i];
+	    A[j]=L1->head->next->moves[j];
 	  }
 	}
 	else{
-	  int* A=NULL;
+	  A=NULL;
 	}
 	temp=newgame();
-	copyboard(L1->head->next->board,temp);
+	copyboard(L1->head->next->b,temp);
 	node->children[0]=ChoiceBuild(A,temp,mm,depth);
 	LLfree(L1);
 	LLfree(L2);
@@ -192,14 +204,14 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
 	      if(whitemove(temp,i,dice[1],-1)==0){
 		if(search(final,temp)==0){
 		  if(root==1){
-		    int* A=malloc(8*sizeof(int));
+		    A=malloc(8*sizeof(int));
 		    for(int j=0;j<8;j++){
-		      A[j]=current->moves[i];
+		      A[j]=current->moves[j];
 		    }
 		    A[2]=i;
 		    A[3]=dice[1];
 		  }else{
-		    int* A=NULL;
+		    A=NULL;
 		  }
 		  add(final,temp,A);
 		  temp=newgame();
@@ -221,14 +233,14 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
               if(whitemove(temp,i,dice[0],-1)==0){
 		if(search(final,temp)==0){
                   if(root==1){
-                    int* A=malloc(8*sizeof(int));
+                    A=malloc(8*sizeof(int));
                     for(int j=0;j<8;j++){
                       A[j]=current->moves[i];
                     }
                     A[2]=i;
                     A[3]=dice[0];
                   }else{
-                    int* A=NULL;
+                    A=NULL;
                   }
                   add(final,temp,A);
                   temp=newgame();
@@ -244,8 +256,8 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
 	node->children=malloc(final->length*sizeof(struct ChoiceNode));
 	current=final->head->next;
 	//Finally! Build the array of children.
-	for(i=0;i<final->length;i++){
-	  node->children[i]=ChoiceBuild(current->moves,current->b,mm,depth,0);
+	for(int i=0;i<final->length;i++){
+	  node->children[i]=ChoiceBuild(current->moves,current->b,mm,depth);
 	}
 	return 0;
       }
@@ -298,12 +310,12 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
 	}
       }
       //if there was originally more than one piece on the bar or it was impossible to get a piece off the bar, then just take the other move from the bar, and make that single board the only child 
-      if(L1->head->next->board->wbar>0 && L2->head->next->board->wbar>0){
-	blackmove(L1->head->next->board,25,dice[1],-1);
+      if(L1->head->next->b->bbar>0 && L2->head->next->b->bbar>0){
+	blackmove(L1->head->next->b,25,dice[1],-1);
 	node->numchildren=1;
-	node->children=malloc(sizeof(ChoiceNode));
+	node->children=malloc(sizeof(struct ChoiceNode));
 	temp=newgame();
-	copyboard(L1->head->next->board,temp);
+	copyboard(L1->head->next->b,temp);
 	node->children[0]=ChoiceBuild(A,temp,mm,depth);
 	LLfree(L1);
 	LLfree(L2);
@@ -353,13 +365,13 @@ int childlist(struct mmNode * node, struct board * b, int * dice, int mm, int de
         node->children=malloc(final->length*sizeof(struct ChoiceNode));
         current=final->head->next;
         //Finally! Build the array of children.
-	for(i=0;i<final->length;i++){
-          node->children[i]=ChoiceBuild(current->moves,current->b,mm,depth,0);
+	for(int i=0;i<final->length;i++){
+          node->children[i]=ChoiceBuild(current->moves,current->b,mm,depth);
         }
         return 0;
       }
     }else{
-      //Here's where the code for maximizer rolling doubles goes!
+      //Here's where the code for minimizer rolling doubles goes!
     }
   }
 }
@@ -369,11 +381,11 @@ struct mmNode * mmBuild(double probability, int * d,struct board * b, int minmax
   node->prob=probability;
   node->dice=d;
   node->mm=minmax*-1;
-  childlist(node,b,d,mm,depth,root);
+  childlist(node,b,d,node->mm,depth,root);
   return node;
 }
 
-struct ChoiceNode * ChoiceBuild(int * m, board * b, int minmax, int depth){
+struct ChoiceNode * ChoiceBuild(int * m, struct board * b, int minmax, int depth){
   struct ChoiceNode * node=malloc(sizeof(struct ChoiceNode));
   node->mm=minmax;
   node->moves=m;
@@ -381,22 +393,24 @@ struct ChoiceNode * ChoiceBuild(int * m, board * b, int minmax, int depth){
     node->value=BoardVal(b);
   }
   else{
-    node->children=malloc(21*sizeof(struct mmNode));
-    double punit=1.0000/36.0000
-    for(i=0;i<6;i++){
-      int * A=malloc(4*sizeof(int));
-      for(j=0;j<4;j++){
-	A[j]=i+1;
-      }
-      node->children[i]=mmBuild(punit,A,b,depth-1);
-      free(A);
-    }
-    int index=5;
-    for(i=0;i<5;i++){
-      for(i=j+1;j<6){
+    //node->children=malloc(21*sizeof(struct mmNode));
+    node->children=malloc(15*sizeof(struct mmNode));
+    double punit=1.0000/36.0000;
+    //for(i=0;i<6;i++){
+    //int * A=malloc(4*sizeof(int));
+    //for(j=0;j<4;j++){
+    //A[j]=i+1;
+    //}
+    //node->children[i]=mmBuild(punit,A,b,depth-1);
+    //free(A);
+    //}
+    int index=0;
+    //int index=5;
+    for(int i=0;i<5;i++){
+      for(int j=i+1;j<6;j++){
 	index++;
-	int A[2]={i+1,j+1}
-	node->children[index]=mmBuild(punit*2,A,b,depth-1,0);
+	int A[2]={i+1,j+1};
+	node->children[index]=mmBuild(punit*2,A,b,minmax,depth-1,0);
       }
     }
   }
@@ -404,40 +418,45 @@ struct ChoiceNode * ChoiceBuild(int * m, board * b, int minmax, int depth){
 }
 
 int * TrieSearch(struct mmNode * head){
-  for(i=0;i<head->numchildren;i++){
+  int value;
+  for(int i=0;i<head->numchildren;i++){
     int v=ChoiceSearch(head->children[i]);
     if(head->mm==1){
-      if(head->value==NULL || v>head->value){
-        head->value=v;
+      if(value==NULL || v>value){
+        value=v;
         head->favorite=head->children[i];
       }
     }
     else{
-      if(head->value==NULL || v<head->value){
-        head->value=v;
+      if(value==NULL || v<value){
+        value=v;
         head->favorite=head->children[i];
       } 
     }
   return head->favorite->moves;
+  }
+  int A[8]={0,0,0,0,0,0,0,0};
+  return A;
 }
 
 double mmSearch(struct mmNode * node){
-  for(i=0;i<node->numchildren;i++){
-    int v=ChoiceSearch(head->children[i]);
+  int value;
+  for(int i=0;i<node->numchildren;i++){
+    int v=ChoiceSearch(node->children[i]);
     if(node->mm==1){
-      if(node->value==NULL || v>node->value){
-        node->value=v;
+      if(value==NULL || v>value){
+        value=v;
         node->favorite=node->children[i];
       }
     }
     else{
-      if(node->value==NULL || v<node->value){
-        node->value=v;
-        node->favorite=head->children[i];
+      if(value==NULL || v<value){
+        value=v;
+        node->favorite=node->children[i];
       }
     }
   }
-  return node->value*node->prob;
+  return value*node->prob;
 }
 
 double ChoiceSearch(struct ChoiceNode * node){
@@ -445,8 +464,8 @@ double ChoiceSearch(struct ChoiceNode * node){
     return node->value;
   }
   else{
-    for(i=0;i<21;i++){
-      value=value+mmSearch(node->children);
+    for(int i=0;i<21;i++){
+      node->value=node->value+mmSearch(node->children[i]);
     }
   }
   return node->value;

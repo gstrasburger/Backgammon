@@ -11,8 +11,8 @@ static double expected=8.16;
 
 double WbarVal(struct board * b){
   double P=0;
-  for(i=1;i<7;i++){
-    for(j=1;j<7;j++){
+  for(int i=1;i<7;i++){
+    for(int j=1;j<7;j++){
       if(b->spaces[i]<-1 && b->spaces[j]<-1){
 	P=P+1;
       }
@@ -24,8 +24,8 @@ double WbarVal(struct board * b){
 
 double BbarVal(struct board * b){
   double P=0;
-  for(i=1;i<7;i++){
-    for(j=1;j<7;j++){
+  for(int i=1;i<7;i++){
+    for(int j=1;j<7;j++){
       if(b->spaces[25-i]>1 && b->spaces[25-j]>1){
         P=P+1;
       } 
@@ -37,7 +37,7 @@ double BbarVal(struct board * b){
 
 double BoardVal(struct board * b){
   double agg=0;
-  for(i=1;i<25;i++){
+  for(int i=1;i<25;i++){
     if(b->spaces[i]>0){
       if(i>18){
 	agg=agg+((i+inbonus)*b->spaces[i]);
