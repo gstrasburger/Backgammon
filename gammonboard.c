@@ -125,7 +125,7 @@ struct board * loadboard(){
   
 
 void copyboard(struct board *B,struct board *new){
-  for(int i=0;i<24;i++){
+  for(int i=1;i<25;i++){
     new->spaces[i]=B->spaces[i];
   }
   new->bbar=B->bbar;

@@ -8,7 +8,7 @@
 #include "stdlib.h"
 
 int whitecan(struct board *B, int move){
-  printf("call to wcan\n");
+  //printf("call to wcan\n");
   if(move==0){
     return 1;
   }

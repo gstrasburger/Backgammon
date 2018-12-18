@@ -4,3 +4,6 @@ gammonfor2: gammonfor2.c gammonboard.c gammonmove.c gammonchecks.c display.c
 
 test:  gammonboard.c gammonmove.c gammonchecks.c display.c test.c MinMax.c boardeval.c
 	gcc -Wall  gammonboard.c gammonmove.c gammonchecks.c display.c test.c MinMax.c boardeval.c -g -o test
+
+gammonfor1ASCII:  gammonboard.c gammonmove.c gammonchecks.c display.c gammonfor1ASCII.c MinMax.c boardeval.c
+	gcc -Wall  gammonboard.c gammonmove.c gammonchecks.c display.c gammonfor1ASCII.c MinMax.c boardeval.c -g -o gammonfor1ASCII
